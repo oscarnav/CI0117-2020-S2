@@ -5,13 +5,11 @@
 
 typedef struct {
     pthread_mutex_t* mutex_array;
-     size_t total;
+    size_t total;
 } shared_data_t;
 
 typedef struct {
-    
     size_t thread_num;
-    pthread_mutex_t mutex_m;
     shared_data_t* shared_data;
 } mutex_data_t;
 
@@ -20,22 +18,15 @@ void* helloWorld(void* args) {
         
     mutex_data_t* data = (mutex_data_t*) args;
     size_t thread_num = data->thread_num;
-    printf("Empezando el thread: %zu\n",thread_num+1 );
     shared_data_t* shared_data = data->shared_data;
     size_t total = shared_data->total;
-
+   
     pthread_mutex_lock(&shared_data->mutex_array[thread_num]);
     
-    if(total==thread_num+1){
+     printf("Hello world from thread number # %zu of %zu threads\n", thread_num+1, total);
+    
      
-    }
-    else{
-     
-     pthread_mutex_unlock(&shared_data->mutex_array[thread_num+1]);
-     printf("Desbloqueado el thread:%zu\n", thread_num+2 );
-    }
-     printf("Hello world from thread number # %zu of %zu threads.\n", thread_num+1, total);
-     
+     pthread_mutex_unlock(&shared_data->mutex_array[thread_num]);
     return NULL;
 }
 
@@ -57,12 +48,14 @@ int main(int argc, char* arg[]) {
    
     for (size_t i = 0; i < thread_count; ++i) {
     pthread_mutex_init(&mutex_list[i], /*attr*/ NULL);
-     mutex_data_list[i].mutex_m = mutex_list[i];
     } 
     
     shared_data->mutex_array = mutex_list;  
     shared_data->total = thread_count;     
      
+    for (size_t i = 1; i < thread_count; ++i) {
+     pthread_mutex_lock(&mutex_list[i]);
+    } 
     
     for (size_t i = 0; i < thread_count; ++i) {
         mutex_data_list[i].thread_num = i;
@@ -70,16 +63,13 @@ int main(int argc, char* arg[]) {
         pthread_create(&threads[i], NULL, helloWorld, (void*)&mutex_data_list[i]);
     }
      
-     for (size_t i = 1; i < thread_count; ++i) {
-     pthread_mutex_lock(&mutex_list[i]);
-
-    }
+     
 
    
 
     for (size_t i = 0; i < thread_count; ++i) {
         pthread_join(threads[i], NULL);
-        //pthread_mutex_unlock(&mutex_data_list[i+1].mutex_m);
+        pthread_mutex_unlock(&mutex_list[i+1]);
        
     }
 
