@@ -1,0 +1,1 @@
+Las diferencias a mi parecer de usar mutex y semaforos es que con los mutex solo uno a la vez puede tener acceso, mientras que con semaforos uno decide a cuantos se les da acceso con el buffer, aunque en este caso solo se les da paso uno a la vez para que lleguen en orden.
