@@ -5,6 +5,7 @@
 #include <time.h>
 #include<semaphore.h>
 
+
 typedef struct {
 
     size_t total;
@@ -14,7 +15,7 @@ typedef struct {
 	size_t reindeer;
 	size_t elves;
 	sem_t reindeerSem;
-	sem_t santaSem
+	sem_t santaSem;
 	pthread_mutex_t reindeerMutex;
 	pthread_mutex_t elfTex;
 	pthread_mutex_t mutex;
@@ -51,8 +52,15 @@ void random_sleep(useconds_t min_milliseconds, useconds_t max_milliseconds){
 }
 
 /*Metodos de Santa*/
+void prepareSleigh(){
+	
+}
+
+void helpElves(){
+	
+}
 void* santaTask(void* args){
-    shared_data* data = (shared_data*) args;
+    shared_data_t* data = (shared_data_t*) args;
 	while(data->total != data->cantTerminados){
 		sem_wait(&data->santaSem);
 		if(data->reindeer >= 9){
@@ -68,21 +76,18 @@ void* santaTask(void* args){
 	}
 }
 
-void prepareSleigh(){
-	
-}
 
-void helpElves(){
-	
-}
 
 /*Metodos de Reindeer*/
+void getHitched(){
+	
+}
 void* reindeerTask(void* args){
-    shared_data* data = (shared_data*) args;
+    shared_data_t* data = (shared_data_t*) args;
 	printf("Reno en vacaciones\n");
-	randomSleep(15000,35000);
+	random_sleep(15000,35000);
 	pthread_mutex_lock(&data->reindeerMutex);
-	++reindeer;
+	++data->reindeer;
 	printf("Reno espera a sus compañeros\n");
     if(data->reindeer >= 9){
         sem_post(&data->santaSem);
@@ -96,74 +101,43 @@ void* reindeerTask(void* args){
 	pthread_mutex_unlock(&data->reindeerMutex);
 }
 
-void getHitched(){
-	
-}
+
 
 /*Metodos de elf*/
+void getHelp(size_t elves){
+	while(elves != 3){
+		
+	}
+}
 void* elfTask(void* args){
-    shared_data* data = (shared_data*) args;
-	printf("Duende trabaja\n")
-	randomSleep(5000,50000);
-    mutex_lock(&data->elfTex);
-    mutex_lock(&data->mutex); //not sure about this one
-	printf("Duende pasa a sala de espera\n")
+    shared_data_t* data = (shared_data_t*) args;
+	printf("Duende trabaja\n");
+	random_sleep(5000,50000);
+    pthread_mutex_lock(&data->elfTex);
+    pthread_mutex_lock(&data->mutex); //not sure about this one
+	printf("Duende pasa a sala de espera\n");
     data->elves += 1;
     	if(data->elves == 3){
         	sem_post(&data->santaSem);
     	}
     	else{	
-			mutex_unlock(&data->elfTex);
+			pthread_mutex_unlock(&data->elfTex);
     	}
     
-    mutex_unlock(&data->mutex);  //not sure about this one
-    getHelp();
-	printf("Duende es ayudado por Santa\n")
-    mutex_lock(&data->mutex);    //not sure about this one
+    pthread_mutex_unlock(&data->mutex);  //not sure about this one
+    getHelp(data->elves);
+	printf("Duende es ayudado por Santa\n");
+    pthread_mutex_lock(&data->mutex);    //not sure about this one
     data->elves -=1;
     	if(data->elves == 0){
-      	 mutex_unlock(&data->elfTex);
+      	 pthread_mutex_unlock(&data->elfTex);
     	}
-	printf("Duende recibio ayuda\n")
-	++data->cantTerminados;
-    mutex_unlock(&data->mutex); //not sure about this one
-}
-
-void getHelp(){
-	while(elves != 3){
-		
-	}
+	printf("Duende recibio ayuda\n");
+	data->cantTerminados += 1;
+    pthread_mutex_unlock(&data->mutex); //not sure about this one
 }
 
 
-
-void* helloWorld(void* args){
-
- 
-
-    thread_data_t* data = (thread_data_t*) args;
-
-    size_t thread_num = data->thread_num;
-
-    shared_data_t* shared_data = data->shared_data;
-
- 
-
-                random_sleep(5000,10000);
-
-                printf("thread %zu/%zu: I am ready!\n", thread_num, shared_data->total);
-
-                pthread_barrier_wait(&shared_data->barrera);
-
-    pthread_mutex_lock(&shared_data->mutex);
-	
-    printf("Thread %zu/%zu: I arrived at position %zu\n", thread_num, shared_data->total, shared_data->position);
-
-    ++shared_data->position;
-	
-    pthread_mutex_unlock(&shared_data->mutex);
-    return NULL;
-}
 
 int main(){
 	
@@ -212,18 +186,20 @@ int main(){
 
 	/*Esperar threads*/
 	pthread_join(santa, NULL);
-	
+
     for (size_t i = 0; i < cantidadReindeer; ++i) {
-        pthread_join(threadsReindeer, NULL);
+        pthread_join(threadsReindeer[i], NULL);
     }
     for (size_t i = 0; i < cantidadElves; ++i) {
-        pthread_join(threadsElves, NULL);
+        pthread_join(threadsElves[i], NULL);
     }
 
 	/*Liberar memoria*/
     sem_destroy(&shared_data->reindeerSem);
 	sem_destroy(&shared_data->santaSem);
-
+    pthread_mutex_destroy(&shared_data->elfTex);
+	pthread_mutex_destroy(&shared_data->mutex);
+	pthread_mutex_destroy(&shared_data->reindeerMutex);
     free(threadsReindeer);
 	free(threadsElves);
     free(shared_data);
