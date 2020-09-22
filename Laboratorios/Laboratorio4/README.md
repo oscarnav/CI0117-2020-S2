@@ -13,4 +13,12 @@ pueden necesitar ayuda espontanea, entonces su rango de tiempo es mayor al de lo
 
 
 -¿Se puedo presentar alguna situacion de deadlock o starvation?
-En este caso pensamos que se podria presentar starvation dado que mientras alguno de los elfos esperan otros podrian ganarle en recibir ayuda entonces este se quedaria esperando ser ayudado.
+En este caso pensamos que se podria presentar starvation dado que mientras 
+alguno de los elfos esperan otros podrian ganarle en recibir ayuda entonces 
+este se quedaria esperando ser ayudado. También se podría presentar starvation con el pase de
+variables, cuando Santa ayude ya sea a los duendes o renos y estos duren más tiempo
+en reportar que ya fueron ayudados que el tiempo en que tarda Santa en revisar si
+ya fueron atendidos todos los duendes y renos. Por esta razón Santa se quedaría
+esperando a un grupo de duendes o renos, cuando realmente ya todos terminaron,
+por lo que nunca sería llamado.
+
