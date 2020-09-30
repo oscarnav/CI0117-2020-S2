@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+typedef struct timespec walltime_t;
 
 float obtenerImagen(float x){
 	x *= x;
@@ -9,7 +10,25 @@ float obtenerImagen(float x){
 	return x;
 }
 
-int main(argc, args[]){
+void walltime_start(walltime_t* start)
+{
+	clock_gettime(CLOCK_MONOTONIC, start);
+}
+
+double walltime_elapsed(const walltime_t* start)
+{
+	walltime_t finish;
+	clock_gettime(CLOCK_MONOTONIC, &finish);
+
+	double elapsed = (finish.tv_sec - start->tv_sec);
+	elapsed += (finish.tv_nsec - start->tv_nsec) / 1000000000.0;
+
+	return elapsed;
+}
+
+int main(int argc, char* arg[]){
+	walltime_t* start = walltime_t;
+	walltime_start(start);
 	float deltaDeX = 0;
 	float a = 0;
 	float b = 0;
@@ -29,11 +48,12 @@ int main(argc, args[]){
 		else{
 			xActual = a;
 			deltaDeX = (b - a)/n;
-			for(int i = 0; i < n, ++i){
+			for(int i = 0; i < n; ++i){
 				areaTotal += obtenerImagen(xActual) * deltaDeX;
-				xActual += deltadeX;
+				xActual += deltaDeX;
 			}
-			printf("El area total es %f.\n", areaTotal);
+			double duracion = walltime_elapsed(start);
+			printf("El area total es %f, el tiempo de ejecucion fue de %f.\n", areaTotal, duracion);
 		}
 	}
 	return 0;
