@@ -27,7 +27,8 @@ double walltime_elapsed(const walltime_t* start)
 }
 
 int main(int argc, char* arg[]){
-	walltime_t* start;
+	walltime_t empezar;
+	walltime_t* start = &empezar;
 	walltime_start(start);
 	float deltaDeX = 0;
 	float a = 0;
