@@ -1,6 +1,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <time.h>
 
 typedef struct timespec walltime_t;
@@ -34,29 +35,6 @@ Cuarto thread:
 	5*1,5 + 15 = 22,5
 */
 
-void* calcularArea(void* args) {
-        
-    thread_data_t* data = args;
-    size_t thread_num = data->thread_num;//podriamos prescindir
-    shared_data_t* shared_data = data->shared_data;
-    float delta_x = shared_data->delta_x;
-    float area = 0;
-	float preimagen = 0;
-	while(data->rectangulosAsignados){
-		preimagen =  data->posRectangulo * delta_x + shared_data->a;
-		float imagen_x = (preimagen*preimagen)+1; // funcion de calculo de imagen iria antes del lock
-		++data->posRectangulo;
-		--data->rectangulosAsignados;
-		area += imagen_x*delta_x;         //calcular area aqui
-	}
-	
-    pthread_mutex_lock(&shared_data->mutex);
-    shared_data->area_total+=area;
-    pthread_mutex_unlock(&shared_data->mutex);
-    return NULL;
-}
-
-
 void walltime_start(walltime_t* start)
 {
 	clock_gettime(CLOCK_MONOTONIC, start);
@@ -73,11 +51,34 @@ double walltime_elapsed(const walltime_t* start)
 	return elapsed;
 }
 
+void* calcularArea(void* args) {
+        
+    thread_data_t* data = args;
+    size_t thread_num = data->thread_num;//podriamos prescindir
+    shared_data_t* shared_data = data->shared_data;
+    float delta_x = shared_data->delta_x;
+    float area = 0;
+	float preimagen = 0;
+	while(data->rectangulosAsignados){
+		preimagen =  data->posRectangulo * delta_x + shared_data->a;
+		float imagen_x = (preimagen*preimagen)+1; // funcion de calculo de imagen iria antes del lock
+		++data->posRectangulo;
+		--data->rectangulosAsignados;
+		area += imagen_x*delta_x;         //calcular area aqui
+		
+	}
+    pthread_mutex_lock(&shared_data->mutex);
+    shared_data->area_total+=area;
+    pthread_mutex_unlock(&shared_data->mutex);
+    return 0;
+}
+
+
 int main(int argc, char* arg[]) {
-    walltime_t* start;
+
+	walltime_t empezar;
+	walltime_t* start = &empezar;
 	walltime_start(start);
-
-
     float punto_a = 0;
 	float punto_b = 0;
 	size_t n_rectangulos = 0;
@@ -89,6 +90,9 @@ int main(int argc, char* arg[]) {
 		punto_b = (float)strtoul(arg[2], NULL, 10);
 		n_rectangulos = (size_t)strtoul(arg[3], NULL, 10);
 		thread_count = (size_t)strtoul(arg[4], NULL, 10);
+		if (thread_count <= 0){
+			thread_count = 1;
+		}
 		
     } else {
         fprintf(stderr, "Error, invalid number of parameters\n");
@@ -104,7 +108,7 @@ int main(int argc, char* arg[]) {
     
 	/*Asignacion de shared data*/
     shared_data->delta_x = (punto_b-punto_a)/n_rectangulos;
-    shared_data->area_total = 0;  //se inicializa el area en 0
+	shared_data->area_total = 0;  //se inicializa el area en 0
 	shared_data->a = punto_a;
     
 	/*Averiguar cuantos rectangulos le toca resolver a cada thread*/
@@ -121,7 +125,7 @@ int main(int argc, char* arg[]) {
 	
 	/*Asignacion de rectangulos para cada thread*/
 	int numRectangulo = 0;
-	for(size_t i=0; i < thread_count; ++i){
+	for(size_t i = 0; i < thread_count; ++i){
 		thread_data[i].posRectangulo = numRectangulo;
 		thread_data[i].rectangulosAsignados = cociente;
 		if(residuo > 0){
@@ -141,14 +145,14 @@ int main(int argc, char* arg[]) {
     for (size_t i = 0; i < thread_count; ++i){
         pthread_join(threads[i], NULL);
     }
-	
-	printf("El area total es %f\n", shared_data->area_total);
+    
+	double duracion = walltime_elapsed(start);
+	printf("El area total es %f, el tiempo de ejecucion es %f.\n", shared_data->area_total, duracion);
 
-	pthread_mutex_destroy(&shared_data->mutex);
+    pthread_mutex_destroy(&shared_data->mutex);
     free(threads);
     free(shared_data);
     free(thread_data);
-	double duracion = walltime_elapsed(start);
-    printf("El tiempo de ejecucion fue de %f.\n", duracion);
-    return 0;
+
+	return 0;
 }
