@@ -38,13 +38,13 @@ void* calcularArea(void* args) {
     size_t thread_num = data->thread_num;//podriamos prescindir
     shared_data_t* shared_data = data->shared_data;
     float delta_x = shared_data->delta_x;
-    float area 0;
+    float area = 0;
 	float preimagen = 0;
 	while(data->rectangulosAsignados){
-		preimagen =  data->posRectangulo * delta_x + shared_data->a};
-		float imagen_x = (pow(preimagen,2))+1; // funcion de calculo de imagen iria antes del lock
-		++posRectangulo;
-		--rectangulosAsignados;
+		preimagen =  data->posRectangulo * delta_x + shared_data->a;
+		float imagen_x = (preimagen*preimagen)+1; // funcion de calculo de imagen iria antes del lock
+		++data->posRectangulo;
+		--data->rectangulosAsignados;
 		area += imagen_x*delta_x;         //calcular area aqui
 	}
 	
@@ -84,7 +84,7 @@ int main(int argc, char* arg[]) {
     pthread_mutex_init(&shared_data->mutex, /*attr*/ NULL); 
     
 	/*Asignacion de shared data*/
-    shared_data->delta_x = (punto_b-punto_a)/n_cuadrados;
+    shared_data->delta_x = (punto_b-punto_a)/n_rectangulos;
     shared_data->area_total = 0;  //se inicializa el area en 0
 	shared_data->a = punto_a;
     
@@ -101,7 +101,7 @@ int main(int argc, char* arg[]) {
 	}
 	
 	/*Asignacion de rectangulos para cada thread*/
-	int numRectagulo = 0;
+	int numRectangulo = 0;
 	for(size_t i; i < thread_count; ++i){
 		thread_data[i].posRectangulo = numRectangulo;
 		thread_data[i].rectangulosAsignados = cociente;
@@ -109,7 +109,7 @@ int main(int argc, char* arg[]) {
 			++thread_data[i].rectangulosAsignados;
 			--residuo;
 		}
-		numRectagulo += thread_data[i].rectangulosAsignados;
+		numRectangulo += thread_data[i].rectangulosAsignados;
 	}
 	
 	/*Crear los threads*/
@@ -122,7 +122,8 @@ int main(int argc, char* arg[]) {
     for (size_t i = 0; i < thread_count; ++i){
         pthread_join(threads[i], NULL);
     }
-	
+	printf("El area total es %f\n", shared_data->area_total);
+
 	pthread_mutex_destroy(&shared_data->mutex);
     free(threads);
     free(shared_data);
