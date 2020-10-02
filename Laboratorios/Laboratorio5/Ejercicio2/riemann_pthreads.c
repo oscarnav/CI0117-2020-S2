@@ -55,8 +55,25 @@ void* calcularArea(void* args) {
 }
 
 
-int main(int argc, char* arg[]) {
+void walltime_start(walltime_t* start)
+{
+	clock_gettime(CLOCK_MONOTONIC, start);
+}
 
+double walltime_elapsed(const walltime_t* start)
+{
+	walltime_t finish;
+	clock_gettime(CLOCK_MONOTONIC, &finish);
+
+	double elapsed = (finish.tv_sec - start->tv_sec);
+	elapsed += (finish.tv_nsec - start->tv_nsec) / 1000000000.0;
+
+	return elapsed;
+}
+
+int main(int argc, char* arg[]) {
+    walltime_t* start;
+	walltime_start(start);
 
 
     float punto_a = 0;
@@ -102,7 +119,7 @@ int main(int argc, char* arg[]) {
 	
 	/*Asignacion de rectangulos para cada thread*/
 	int numRectangulo = 0;
-	for(size_t i; i < thread_count; ++i){
+	for(size_t i=0; i < thread_count; ++i){
 		thread_data[i].posRectangulo = numRectangulo;
 		thread_data[i].rectangulosAsignados = cociente;
 		if(residuo > 0){
@@ -122,12 +139,14 @@ int main(int argc, char* arg[]) {
     for (size_t i = 0; i < thread_count; ++i){
         pthread_join(threads[i], NULL);
     }
+	
 	printf("El area total es %f\n", shared_data->area_total);
 
 	pthread_mutex_destroy(&shared_data->mutex);
     free(threads);
     free(shared_data);
     free(thread_data);
-
+	double duracion = walltime_elapsed(start);
+    printf("El tiempo de ejecucion fue de %f.\n", duracion);
     return 0;
 }
