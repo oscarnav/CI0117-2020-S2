@@ -11,19 +11,20 @@ typedef struct{
 }dna_data_t;
 
 typedef struct {
-    pthread_mutex_t* mutex_array;
+    
     size_t total;
     size_t actual1;
-    dna_data_t* secuence1_array;
-    dna_data_t* secuence2_array;
-    dna_data_t* common_array;
+	dna_data_t* secuence1_array;
+	dna_data_t* secuence2_array;
+	dna_data_t* common_array;
+	pthread_mutex_t* mutex_array;
 } shared_data_t;
 
 typedef struct {
     size_t posI1;
     size_t posI2;
     size_t cant_lugares1;
-    size_t cant_lugares2;
+	size_t cant_lugares2;
     size_t thread_num;
     shared_data_t* shared_data;
 } thread_data_t;
@@ -33,27 +34,29 @@ typedef struct {
 
 
 void* analizarSecuencias(void* args) {
-      	thread_data_t* data = args; 
-      	size_t thread_num = data->thread_num;
-      	size_t lugares1 = data->cant_lugares1;
-        size_t lugares2 = data->cant_lugares2;
+      thread_data_t* data = args; 
+      size_t thread_num = data->thread_num;
+	  size_t lugares1 = data->cant_lugares1;
+      size_t lugares2 = data->cant_lugares2;
       
-         shared_data_t* shared_data = data->shared_data;
-	  pthread_mutex_lock(&shared_data->mutex_array[thread_num]);
-          size_t C_restantes = data->cant_lugares1;
+      shared_data_t* shared_data = data->shared_data;
+	  //pthread_mutex_lock(&shared_data->mutex_array[thread_num]);
+      size_t C_restantes = data->cant_lugares1;
 	  size_t C_pos = data->posI1;
 	  
-	  /*Aqui se analiza la primera secuencia*/
+	  //Aqui se analiza la primera secuncia
 	   while(data->cant_lugares1>0){
 		    for(size_t i2=0;i2<26;++i2){
 				if(shared_data->secuence1_array[i2].letra == DNA1[data->posI1]){
+					pthread_mutex_lock(&shared_data->mutex_array[0]);
 					++shared_data->secuence1_array[i2].frecuencia;
+					pthread_mutex_unlock(&shared_data->mutex_array[0]);
 				}
 		    }
             ++data->posI1;
             --data->cant_lugares1;
 	   }
-       /*Caracteres comunes*/
+       //Caracteres comunes
 	   while(C_restantes>0){
 		   
            for(size_t i1=0;i1<DNA2_len;++i1){
@@ -62,8 +65,9 @@ void* analizarSecuencias(void* args) {
                     for(size_t i2=0;i2<26;++i2){
                         
                         if(shared_data->secuence1_array[i2].letra == DNA1[C_pos]){
-                            shared_data->common_array[i2].frecuencia=1;
-                            
+                            pthread_mutex_lock(&shared_data->mutex_array[1]);
+							shared_data->common_array[i2].frecuencia=1;
+                            pthread_mutex_unlock(&shared_data->mutex_array[1]);
                         }  
                     }
                 }   
@@ -74,11 +78,13 @@ void* analizarSecuencias(void* args) {
         
     
 	
-	 /*Aqui se analiza la segunda secuencia*/
+	 //Aqui se analiza la segunda secuncia
 	   while(data->cant_lugares2>0){
 		    for(size_t i2=0;i2<26;++i2){
 				if(shared_data->secuence2_array[i2].letra == DNA2[data->posI2]){
+					pthread_mutex_lock(&shared_data->mutex_array[2]);
 					++shared_data->secuence2_array[i2].frecuencia;
+					pthread_mutex_unlock(&shared_data->mutex_array[2]);
 				}
 		    }
 	        ++data->posI2;
@@ -107,12 +113,12 @@ int main(int argc, char* arg[]) {
         return 1;
     }
     
-	/*crear arreglos y reservar memoria*/
+	/*crear arreglos*/
     
 	pthread_t* threads = malloc((size_t)(thread_count+1 * sizeof(pthread_t)));
     shared_data_t* shared_data = (shared_data_t*)calloc(1, sizeof(shared_data_t));
     thread_data_t* thread_data = malloc((size_t)(thread_count * sizeof(thread_data_t)));
-    pthread_mutex_t* mutex_list = malloc((size_t)(thread_count * sizeof(pthread_mutex_t)));
+    pthread_mutex_t* mutex_list = malloc((size_t)(3 * sizeof(pthread_mutex_t)));
     
     dna_data_t* dna1_data_list = malloc((size_t)(26*sizeof(dna_data_t)));  
     dna_data_t* dna2_data_list = malloc((size_t)(26*sizeof(dna_data_t)));  
@@ -124,7 +130,7 @@ int main(int argc, char* arg[]) {
     pthread_mutex_init(&mutex_list[i], /*attr*/ NULL);
     } 
 
-	/*Para inicializar el vector de letras*/
+	//Para inicializar el vector de letras
     
     for(int i=0; i<26; i++){
         dna1_data_list[i].letra = 'a'+i;
@@ -136,16 +142,16 @@ int main(int argc, char* arg[]) {
 	}
    
     
-    /*Asignar el shared_data correctamente*/
+    //Asignar el shared_data correctamente
     shared_data->mutex_array = mutex_list;
     shared_data->secuence1_array = dna1_data_list;  
     shared_data->secuence2_array = dna2_data_list;
     shared_data->common_array = dna3_data_list;
-    shared_data->total = thread_count;     
+	shared_data->total = thread_count;     
     shared_data->actual1 = 0;
 
- 
-    /*Calculo de limites de cada hilo(cuantos espacios van a leer de la secuencia)*/
+    //Creacion de los hilos
+    //Calculo de limites de cada hilo
     size_t restantes1 = DNA1_len;
     size_t lugares1  = 0;
     for (size_t i = 0; i < thread_count; ++i){
@@ -163,8 +169,8 @@ int main(int argc, char* arg[]) {
     }
 	
 	size_t restantes2 = DNA1_len;
-        size_t lugares2  = 0;
-        for (size_t i = 0; i < thread_count; ++i){
+    size_t lugares2  = 0;
+    for (size_t i = 0; i < thread_count; ++i){
         thread_data[i].cant_lugares2=0;
         
         if(restantes2 % thread_count==0){
@@ -180,26 +186,23 @@ int main(int argc, char* arg[]) {
 
     
     
-    for (size_t i = 1; i < thread_count; ++i) {
-     pthread_mutex_lock(&mutex_list[i]);
-    } 
     
-    /*Creacion de hilos y asignacion de posicion incial a leer de la secuencia por cada pthread*/
     size_t posI1=0;
     size_t posI2=0;
     for (size_t i = 0; i < thread_count; ++i){
+        
         thread_data[i].cant_lugares1+=lugares1;
         if(i==thread_count-1){
         ++thread_data[i].cant_lugares2;
         }
-	thread_data[i].cant_lugares2+=lugares2;
-	thread_data[i].posI1=posI1;
-	thread_data[i].posI2=posI2;
-	thread_data[i].thread_num = i;
-	thread_data[i].shared_data = shared_data;
-	pthread_create(&threads[i], NULL, analizarSecuencias, (void*)&thread_data[i]);
-	posI1+=thread_data[i].cant_lugares1;
-	posI2+=thread_data[i].cant_lugares2;
+	    thread_data[i].cant_lugares2+=lugares2;
+	    thread_data[i].posI1=posI1;
+		thread_data[i].posI2=posI2;
+		thread_data[i].thread_num = i;
+		thread_data[i].shared_data = shared_data;
+		pthread_create(&threads[i], NULL, analizarSecuencias, (void*)&thread_data[i]);
+		posI1+=thread_data[i].cant_lugares1;
+		posI2+=thread_data[i].cant_lugares2;
     }
     
     
@@ -207,11 +210,8 @@ int main(int argc, char* arg[]) {
     
     for (size_t i = 0; i < thread_count; ++i) {
         pthread_join(threads[i], NULL);
-        pthread_mutex_unlock(&mutex_list[i+1]);
-       
     }
 	
-    /*Salida*/
     printf("Sequence 1. ocurrences: ");
 	for (size_t i = 0; i < 26; ++i) {
         if(shared_data->secuence1_array[i].frecuencia!=0){
@@ -219,7 +219,6 @@ int main(int argc, char* arg[]) {
 		}	
        
     }
-
     printf("\nSequence 2. ocurrences: ");
     for (size_t i = 0; i < 26; ++i) {
         if(shared_data->secuence2_array[i].frecuencia!=0){
@@ -227,6 +226,7 @@ int main(int argc, char* arg[]) {
 		}	
        
     }
+
 
     printf("\nCommon letters: ");
     for (size_t i = 0; i < 26; ++i) {
@@ -236,7 +236,7 @@ int main(int argc, char* arg[]) {
     }
     printf("\n");
     
-    /*Liberacion de memoria*/
+    
     
     free(threads);
     free(shared_data);
