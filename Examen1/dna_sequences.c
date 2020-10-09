@@ -14,13 +14,14 @@ typedef struct {
     pthread_mutex_t* mutex_array;
     size_t total;
     size_t actual1;
-	size_t actual2;
 	dna_data_t* secuence1_array;
 	dna_data_t* secuence2_array;
 	dna_data_t* common_array;
 } shared_data_t;
 
 typedef struct {
+    size_t posI1;
+    size_t posI2;
     size_t cant_lugares1;
 	size_t cant_lugares2;
     size_t thread_num;
@@ -39,46 +40,51 @@ void* analizarSecuencias(void* args) {
       
       shared_data_t* shared_data = data->shared_data;
 	  pthread_mutex_lock(&shared_data->mutex_array[thread_num]);
-      size_t actual1 = shared_data->actual1;
-      size_t actual2 = shared_data->actual2;
-	  
+      size_t C_restantes = data->cant_lugares1;
+	  size_t C_pos = data->posI1;
 	  
 	  //Aqui se analiza la primera secuncia
-	   for(size_t i=actual1;i<actual1+lugares1;++i){
+	   while(data->cant_lugares1>0){
 		    for(size_t i2=0;i2<26;++i2){
-				if(shared_data->secuence1_array[i2].letra == DNA1[i]){
+				if(shared_data->secuence1_array[i2].letra == DNA1[data->posI1]){
 					++shared_data->secuence1_array[i2].frecuencia;
 				}
 		    }
+            ++data->posI1;
+            --data->cant_lugares1;
 	   }
        //Caracteres comunes
-	   for(size_t i=actual1;i<actual1+lugares1;++i){
+	   while(C_restantes>0){
 		   
            for(size_t i1=0;i1<DNA2_len;++i1){
                 
-               if(DNA1[i]==DNA2[i1]){
+               if(DNA1[C_pos]==DNA2[i1]){
                     for(size_t i2=0;i2<26;++i2){
                         
-                        if(shared_data->secuence1_array[i2].letra == DNA1[i]){
+                        if(shared_data->secuence1_array[i2].letra == DNA1[C_pos]){
                             shared_data->common_array[i2].frecuencia=1;
                             
                         }  
                     }
                 }   
-           }	
+           }
+         ++C_pos;
+         --C_restantes;
 	   }
-        shared_data->actua1l+=data->cant_lugares1;
+        
     
 	
 	 //Aqui se analiza la segunda secuncia
-	   for(size_t i=actual2;i<actual2+lugares2;++i){
+	   while(data->cant_lugares2>0){
 		    for(size_t i2=0;i2<26;++i2){
-				if(shared_data->secuence2_array[i2].letra == DNA1[i]){
+				if(shared_data->secuence2_array[i2].letra == DNA2[data->posI2]){
 					++shared_data->secuence2_array[i2].frecuencia;
 				}
 		    }
-	   }
-       shared_data->actua12+=data->cant_lugares2;
+	        ++data->posI2;
+            --data->cant_lugares2;
+       }
+       
 	   
 	   
 	  
@@ -141,12 +147,11 @@ int main(int argc, char* arg[]) {
     shared_data->common_array = dna3_data_list;
 	shared_data->total = thread_count;     
     shared_data->actual1 = 0;
-    shared_data->actual2 = 0;
 
     //Creacion de los hilos
     //Calculo de limites de cada hilo
-    int restantes1 = DNA1_len;
-    int lugares1  = 0;
+    size_t restantes1 = DNA1_len;
+    size_t lugares1  = 0;
     for (size_t i = 0; i < thread_count; ++i){
         thread_data[i].cant_lugares1=0;
         
@@ -161,8 +166,8 @@ int main(int argc, char* arg[]) {
        
     }
 	
-	int restantes2 = DNA1_len;
-    int lugares2  = 0;
+	size_t restantes2 = DNA1_len;
+    size_t lugares2  = 0;
     for (size_t i = 0; i < thread_count; ++i){
         thread_data[i].cant_lugares2=0;
         
@@ -182,13 +187,23 @@ int main(int argc, char* arg[]) {
     for (size_t i = 1; i < thread_count; ++i) {
      pthread_mutex_lock(&mutex_list[i]);
     } 
-
+    
+    size_t posI1=0;
+    size_t posI2=0;
     for (size_t i = 0; i < thread_count; ++i){
+        
         thread_data[i].cant_lugares1+=lugares1;
+            if(i==thread_count-1){
+            ++thread_data[i].cant_lugares2;
+            }
         thread_data[i].cant_lugares2+=lugares2;
-		thread_data[i].thread_num = i;
+		thread_data[i].posI1=posI1;
+        thread_data[i].posI2=posI2;
+        thread_data[i].thread_num = i;
         thread_data[i].shared_data = shared_data;
         pthread_create(&threads[i], NULL, analizarSecuencias, (void*)&thread_data[i]);
+        posI1+=thread_data[i].cant_lugares1;
+        posI2+=thread_data[i].cant_lugares2;
     }
     
     
