@@ -54,7 +54,7 @@ void* hacker(void* args) {
     shared_data->hackers++;
 
     if (shared_data->hackers == 4) {
-		contador_hacker=4;
+		shared_data->contador_hacker=4;
         
             //sem_post(&shared_data->hackerQueue);  
 			pthread_cond_signal(&shared_data->cond_var_hacker);
@@ -64,8 +64,8 @@ void* hacker(void* args) {
         data->isCaptain = 1;
 
     } else if (shared_data->hackers == 2 && shared_data->serfs >= 2) {
-        contador_serf=2;
-		contador_hacker=2;
+        shared_data->contador_serf=2;
+		shared_data->contador_hacker=2;
 		
             pthread_cond_signal(&shared_data->cond_var_serf);
 			pthread_cond_signal(&shared_data->cond_var_hacker);
@@ -81,8 +81,8 @@ void* hacker(void* args) {
      pthread_mutex_lock(&shared_data->mutex_hacker);
 	 pthread_cond_signal(&shared_data->cond_var_hacker);
 	 
-	  --contador_hacker;
-	 if(contador_hacker>0){
+	  --shared_data->contador_hacker;
+	 if(shared_data->contador_hacker>0){
 		 
 		 pthread_cond_signal(&shared_data->cond_var_hacker);
 		 
@@ -125,7 +125,7 @@ void* serf(void* args){
     shared_data->serfs++;
 
     if (shared_data->serfs == 4) {
-        contador_serf=4;
+        shared_data->contador_serf=4;
 		
             //sem_post(&shared_data->serfQueue);
 			pthread_cond_signal(&shared_data->cond_var_hacker);
@@ -134,8 +134,8 @@ void* serf(void* args){
         data->isCaptain = 1;
 
     } else if (shared_data->serfs == 2 && shared_data->hackers >= 2) {
-        contador_serf=2;
-		contador_hacker=2;
+        shared_data->contador_serf=2;
+		shared_data->contador_hacker=2;
 		pthread_cond_signal(&shared_data->cond_var_serf);
 		pthread_cond_signal(&shared_data->cond_var_hacker);
         
@@ -149,8 +149,8 @@ void* serf(void* args){
      pthread_mutex_lock(&shared_data->mutex_serf);
 	 pthread_cond_signal(&shared_data->cond_var_serf);
 	 
-	  --contador_serf;
-	 if(contador_serf>0){
+	  --shared_data->contador_serf;
+	 if(shared_data->contador_serf>0){
 		 
 		 pthread_cond_signal(&shared_data->cond_var_serf);
 		 
