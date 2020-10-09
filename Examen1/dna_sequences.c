@@ -14,9 +14,10 @@ typedef struct {
     
     size_t total;
     size_t actual1;
-	dna_data_t* secuence1_array;
-	dna_data_t* secuence2_array;
+	
+    dna_data_t* secuence1_array;
 	dna_data_t* common_array;
+    dna_data_t* secuence2_array;
 	pthread_mutex_t* mutex_array;
 } shared_data_t;
 
@@ -38,7 +39,7 @@ void* analizarSecuencias(void* args) {
       size_t thread_num = data->thread_num;
 	  size_t lugares1 = data->cant_lugares1;
       size_t lugares2 = data->cant_lugares2;
-      
+      printf("inicia %zu : lugares %zu\n",data->posI1,lugares1);
       shared_data_t* shared_data = data->shared_data;
 	  //pthread_mutex_lock(&shared_data->mutex_array[thread_num]);
       size_t C_restantes = data->cant_lugares1;
@@ -53,9 +54,9 @@ void* analizarSecuencias(void* args) {
 					pthread_mutex_unlock(&shared_data->mutex_array[0]);
 				}
 		    }
-            ++data->posI1;
+	        ++data->posI1;
             --data->cant_lugares1;
-	   }
+       }
        //Caracteres comunes
 	   while(C_restantes>0){
 		   
