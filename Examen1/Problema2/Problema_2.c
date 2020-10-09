@@ -80,10 +80,11 @@ void* hacker(void* args) {
     ++shared_data->cantidad;
 	pthread_mutex_lock(&shared_data->mutexBarrier);
 	if(shared_data->cantidad < 4){
-		pthread_cond_wait(&shared_data->cond_var);
+		pthread_cond_wait(&shared_data->cond_var,&shared_data->mutexBarrier);
 	}
 	else{
-		pthread_cond_boardcast(&shared_data->cond_var);
+		shared_data->cantidad=0;
+        pthread_cond_broadcast(&shared_data->cond_var);
 	}
 	pthread_mutex_unlock(&shared_data->mutexBarrier);
 
@@ -139,7 +140,20 @@ void* serf(void* args){
     	printf("-------------------------Thread %zu (Serf): On board!--- ----------------------\n", thread_num);
 
     //wait for 4 threads
-    pthread_barrier_wait(&shared_data->barrier);
+    //pthread_barrier_wait(&shared_data->barrier);
+
+
+
+    ++shared_data->cantidad;
+	pthread_mutex_lock(&shared_data->mutexBarrier);
+	if(shared_data->cantidad < 4){
+		pthread_cond_wait(&shared_data->cond_var,&shared_data->mutexBarrier);
+	}
+	else{
+		shared_data->cantidad=0;
+        pthread_cond_broadcast(&shared_data->cond_var);
+	}
+	pthread_mutex_unlock(&shared_data->mutexBarrier);
 
     if (data->isCaptain) {
         //Row boat!
