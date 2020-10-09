@@ -17,13 +17,10 @@ typedef struct{
     sem_t hackerQueue;
     sem_t serfQueue;
     pthread_mutex_t mutex;
-	pthread_mutex_t mutex_hacker;
-	pthread_mutex_t mutex_serf;
-    pthread_barrier_t barrier;
-	pthread_cond_t cond_var_hacker;
-	pthread_cond_t cond_var_serf;
-	size_t contador_hacker;
-	size_t contador_serf;
+     pthread_mutex_t mutexBarrier;
+	//pthread_barrier_t barrier;
+	size_t cantidad;
+	pthread_cond_t cond_var;
 } shared_data_t;
 
 typedef struct{
@@ -54,50 +51,43 @@ void* hacker(void* args) {
     shared_data->hackers++;
 
     if (shared_data->hackers == 4) {
-		shared_data->contador_hacker=4;
-        
-            //sem_post(&shared_data->hackerQueue);  
-			pthread_cond_signal(&shared_data->cond_var_hacker);
-			
-        
+        for (size_t i = 0; i < 4; ++i) {
+            sem_post(&shared_data->hackerQueue);
+        }
         shared_data->hackers = 0;
         data->isCaptain = 1;
 
     } else if (shared_data->hackers == 2 && shared_data->serfs >= 2) {
-        shared_data->contador_serf=2;
-		shared_data->contador_hacker=2;
-		
-            pthread_cond_signal(&shared_data->cond_var_serf);
-			pthread_cond_signal(&shared_data->cond_var_hacker);
-            
-        
+        for (size_t i = 0; i < 2; ++i) {
+            sem_post(&shared_data->hackerQueue);
+            sem_post(&shared_data->serfQueue);
+        }
         shared_data->hackers = 0;
         shared_data->serfs -= 2;
         data->isCaptain = 1;
     } else {
         pthread_mutex_unlock(&shared_data->mutex);
     }
-     
-     pthread_mutex_lock(&shared_data->mutex_hacker);
-	 pthread_cond_wait(&shared_data->cond_var_hacker,&shared_data->mutex_hacker);
-	 
-	  --shared_data->contador_hacker;
-	 if(shared_data->contador_hacker>0){
-		 
-		 pthread_cond_signal(&shared_data->cond_var_hacker);
-		 
-	 }
-	 
-	  pthread_mutex_unlock(&shared_data->mutex_hacker);
-	  
-	 
-	 
+
+    sem_wait(&shared_data->hackerQueue);
 
     //Board!
     	printf("------------------------Thread %zu (Hacker): On board!-------------------------\n", thread_num);
 
     //wait for 4 threads
-    pthread_barrier_wait(&shared_data->barrier); 
+    //pthread_barrier_wait(&shared_data->barrier);
+
+    ++shared_data->cantidad;
+	pthread_mutex_lock(&shared_data->mutexBarrier);
+	if(shared_data->cantidad < 4){
+		pthread_cond_wait(&shared_data->cond_var);
+	}
+	else{
+		pthread_cond_boardcast(&shared_data->cond_var);
+	}
+	pthread_mutex_unlock(&shared_data->mutexBarrier);
+
+
 
     if (data->isCaptain) {
         //Row boat!
@@ -125,20 +115,17 @@ void* serf(void* args){
     shared_data->serfs++;
 
     if (shared_data->serfs == 4) {
-        shared_data->contador_serf=4;
-		
-            //sem_post(&shared_data->serfQueue);
-			pthread_cond_signal(&shared_data->cond_var_hacker);
-       
+        for (size_t i = 0; i < 4; ++i) {
+            sem_post(&shared_data->serfQueue);
+        }
         shared_data->serfs = 0;
         data->isCaptain = 1;
 
     } else if (shared_data->serfs == 2 && shared_data->hackers >= 2) {
-        shared_data->contador_serf=2;
-		shared_data->contador_hacker=2;
-		pthread_cond_signal(&shared_data->cond_var_serf);
-		pthread_cond_signal(&shared_data->cond_var_hacker);
-        
+        for (size_t i = 0; i < 2; ++i) {
+            sem_post(&shared_data->serfQueue);
+            sem_post(&shared_data->hackerQueue);
+        }
         shared_data->serfs = 0;
         shared_data->hackers -= 2;
         data->isCaptain = 1;
@@ -146,17 +133,7 @@ void* serf(void* args){
         pthread_mutex_unlock(&shared_data->mutex);
     }
 
-     pthread_mutex_lock(&shared_data->mutex_serf);
-	 pthread_cond_wait(&shared_data->cond_var_serf,&shared_data->mutex_serf);
-	 
-	  --shared_data->contador_serf;
-	 if(shared_data->contador_serf>0){
-		 
-		 pthread_cond_signal(&shared_data->cond_var_serf);
-		 
-	 }
-	 
-	  pthread_mutex_unlock(&shared_data->mutex_serf);
+    sem_wait(&shared_data->serfQueue);
 
     //Board!
     	printf("-------------------------Thread %zu (Serf): On board!--- ----------------------\n", thread_num);
@@ -182,17 +159,14 @@ int main(){
 	shared_data_t* shared_data = (shared_data_t*)calloc(1, sizeof(shared_data_t));
 	srand(time(NULL));
 	shared_data->thread_count = ((rand()%10)+4);	
-    shared_data->contador_hacker =0;
-	shared_data->contador_serf =0;
+    shared_data->cantidad=0;
 	//Initialization of shared resources
 	sem_init(&shared_data->hackerQueue, 0, 0);
 	sem_init(&shared_data->serfQueue, 0, 0);
 	pthread_mutex_init(&shared_data->mutex, NULL);
-	pthread_mutex_init(&shared_data->mutex_serf, NULL);
-	pthread_mutex_init(&shared_data->mutex_hacker, NULL);
-	pthread_cond_init(&shared_data->cond_var_serf, NULL);
-	pthread_cond_init(&shared_data->cond_var_hacker, NULL);
-	pthread_barrier_init(&shared_data->barrier, NULL, 4);
+	pthread_mutex_init(&shared_data->mutexBarrier, NULL);
+	pthread_cond_init(&shared_data->cond_var, NULL);
+	//pthread_barrier_init(&shared_data->barrier, NULL, 4);
 
 	//Distribute thread types randomly
 	shared_data->hacker_thread_count = rand()%shared_data->thread_count;
@@ -232,7 +206,6 @@ int main(){
 	for(size_t i = 0; i < shared_data->thread_count; i++){
 		pthread_join(serf_threads[i], NULL);
 		pthread_join(hacker_threads[i], NULL);
-		
 	}
 		
 	//Memory cleanup
@@ -241,10 +214,7 @@ int main(){
 	sem_destroy(&shared_data->hackerQueue);
 	sem_destroy(&shared_data->serfQueue);
 	pthread_mutex_destroy(&shared_data->mutex);
-	pthread_mutex_destroy(&shared_data->mutex_serf);
-	pthread_mutex_destroy(&shared_data->mutex_hacker);
-    pthread_cond_destroy(&shared_data->cond_var_serf);
-	pthread_cond_destroy(&shared_data->cond_var_hacker);
-	
+	pthread_mutex_destroy(&shared_data->mutexBarrier);
+	pthread_cond_destroy(&shared_data->cond_var);
 	return 0;
 }
