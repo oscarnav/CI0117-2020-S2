@@ -45,7 +45,7 @@ void* analizarSecuencias(void* args) {
       size_t C_restantes = data->cant_lugares1;
 	  size_t C_pos = data->posI1;
 	  
-	  //Aqui se analiza la primera secuncia
+	  /*Aqui se analiza la primera secuencia*/
 	   while(data->cant_lugares1>0){
 		    for(size_t i2=0;i2<26;++i2){
 				if(shared_data->secuence1_array[i2].letra == DNA1[data->posI1]){
@@ -57,7 +57,7 @@ void* analizarSecuencias(void* args) {
 	        ++data->posI1;
             --data->cant_lugares1;
        }
-       //Caracteres comunes
+       /*Caracteres comunes*/
 	   while(C_restantes>0){
 		   
            for(size_t i1=0;i1<DNA2_len;++i1){
@@ -79,7 +79,7 @@ void* analizarSecuencias(void* args) {
         
     
 	
-	 //Aqui se analiza la segunda secuncia
+	 /*Aqui se analiza la segunda secuencia*/
 	   while(data->cant_lugares2>0){
 		    for(size_t i2=0;i2<26;++i2){
 				if(shared_data->secuence2_array[i2].letra == DNA2[data->posI2]){
@@ -131,7 +131,7 @@ int main(int argc, char* arg[]) {
     pthread_mutex_init(&mutex_list[i], /*attr*/ NULL);
     } 
 
-	//Para inicializar el vector de letras
+	/*Para inicializar los vectores de letras*/
     
     for(int i=0; i<26; i++){
         dna1_data_list[i].letra = 'a'+i;
@@ -143,7 +143,7 @@ int main(int argc, char* arg[]) {
 	}
    
     
-    //Asignar el shared_data correctamente
+    /*Asignar el shared_data correctamente*/
     shared_data->mutex_array = mutex_list;
     shared_data->secuence1_array = dna1_data_list;  
     shared_data->secuence2_array = dna2_data_list;
@@ -151,8 +151,8 @@ int main(int argc, char* arg[]) {
 	shared_data->total = thread_count;     
     shared_data->actual1 = 0;
 
-    //Creacion de los hilos
-    //Calculo de limites de cada hilo
+    
+    /*Calculo de limites de numero de espacios a leer de cada hilo*/
     size_t restantes1 = DNA1_len;
     size_t lugares1  = 0;
     for (size_t i = 0; i < thread_count; ++i){
@@ -187,7 +187,11 @@ int main(int argc, char* arg[]) {
 
     
     
+    /*
+    Creacion de los hilos
+    Se asigna las posicion de inicio a iniciar de cada hilo
     
+    */
     size_t posI1=0;
     size_t posI2=0;
     for (size_t i = 0; i < thread_count; ++i){
@@ -208,11 +212,18 @@ int main(int argc, char* arg[]) {
     
     
     
-    
+    /*
+    El join de los hilos
+    */
     for (size_t i = 0; i < thread_count; ++i) {
         pthread_join(threads[i], NULL);
     }
 	
+ 
+    /*
+    Salida
+    */
+
     printf("Sequence 1. ocurrences: ");
 	for (size_t i = 0; i < 26; ++i) {
         if(shared_data->secuence1_array[i].frecuencia!=0){
