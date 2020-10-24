@@ -65,7 +65,7 @@ En la carpeta controlador se encuentra la implementación de dichos modelos resp
 Se utilizaron 7 mutex en total, 2 mutex fueron utilizados para que solo hubiese un hilo por equipo peleando a la vez. Otros dos mutex fueron utilizados y distribuidos de la siguiente manera: uno para que cada jugador  bloquee su vida para revisarla y el otro para que cada jugador bloquee la vida del oponente para realizar un ataque, dichos son recíprocos para cada jugador. Los dos siguientes mutex fueron utilizados para chequear si hay cambio de pokemon, dichos son recíprocos para cada jugador. El mutex restante fue utilizado para que el GrandMaster empiece el cronómetro de la duración de la batalla
 
 ## Barrier:
-Se utilizó un barrier para asegurar que los dos primeros  pokemones de cada equipo en pelear comenzasen a pelear al mismo tiempo. 
+Se utilizó un barrier para asegurar que los dos primeros  pokemones de cada equipo en pelear comenzasen a pelear al mismo tiempo, y otro barrier para que la pelea empiece cuando lleguen todos los threads.
 
 
 # Problemas:
