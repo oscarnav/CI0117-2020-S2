@@ -1,0 +1,2 @@
+compile: Controller/mapper.c Controller/GrandMaster.c Controller/pokemon.c View/pokemon_ui.c
+	gcc `pkg-config --cflags gtk+-3.0` Controller/mapper.c Controller/GrandMaster.c Controller/pokemon.c View/pokemon_ui.c -lm -pthread -o poke_battle_i `pkg-config --libs gtk+-3.0`
