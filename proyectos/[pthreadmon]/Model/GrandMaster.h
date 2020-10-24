@@ -16,6 +16,7 @@ typedef struct{
     pthread_mutex_t* mutex;                  //1 mutex para empezar a pelear, otro para revizar la vida de uno;
     float* HP[6];                               //ver si funciona
     pthread_barrier_t barrera;                  //barrera que permite que los dos pokemones se empiezen a dañar al mismo tiempo y no uno antes que el otro
+    pthread_barrier_t barreraDeInicio;
     pokemon_data_t** pokemones;
     walltime_t* tiemposStart;
     double* duraciones;

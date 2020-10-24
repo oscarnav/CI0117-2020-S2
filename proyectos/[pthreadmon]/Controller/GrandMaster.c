@@ -83,7 +83,8 @@ void* fight (void* args) {
 
 	/*El pokemon se espera a ser invocado*/
 	printf("Llego el thread %i\n", thread_num);
-	//pthread_barrier_wait(&shared_data->barrera);
+	
+	pthread_barrier_wait(&shared_data->barreraDeInicio);
 	
 	if(thread_num == 0 || thread_num == 3){
 		pthread_barrier_wait(&shared_data->barrera);
@@ -284,6 +285,7 @@ void iniciarBatalla(int* pokemonesID){
 
 	/*Inicializar barrera*/
 	pthread_barrier_init(&shared_data->barrera, NULL, 2);
+	pthread_barrier_init(&shared_data->barreraDeInicio, NULL, 6);
 
 
 	/*Crear los threads*/
@@ -330,6 +332,7 @@ void iniciarBatalla(int* pokemonesID){
 
 
 	pthread_barrier_destroy(&shared_data->barrera);
+	pthread_barrier_destroy(&shared_data->barreraDeInicio);
 
 	//liberar el vector de los pokemones
 
