@@ -30,18 +30,18 @@ int main(int argc, char* arg[]){
 	walltime_t empezar;
 	walltime_t* start = &empezar;
 	walltime_start(start);
-	float deltaDeX = 0;
-	float a = 0;
-	float b = 0;
+	long double deltaDeX = 0;
+	long double a = 0;
+	long double b = 0;
 	size_t n = 0;
-	float areaTotal = 0;
+	long double areaTotal = 0;
 	if(argc < 4){
 		printf("Error, no ingresó los parametros solicitados.\n");
 	}
 	else{
-		a = (float)strtoul(arg[1], NULL, 10);
-		b = (float)strtoul(arg[2], NULL, 10);
-		n = (size_t)strtoul(arg[3], NULL, 10);
+		a = (long double)strtoul(arg[1], NULL, 10);
+		b = (long double)strtoul(arg[2], NULL, 10);
+		n = (long double)strtoul(arg[3], NULL, 10);
 		if(a > b || n < 1){
 			printf("Error, parametro a > b o n < 1.\n");
 		}
@@ -50,12 +50,12 @@ int main(int argc, char* arg[]){
 			
 			#pragma parallel for default(none) shared(deltaDeX, n) reduction(+:areaTotal)
 			for(size_t i = 0; i < n; ++i){
-				float xActual = a+i*deltaDeX;
+				long double xActual = a+i*deltaDeX;
 				areaTotal += obtenerImagen(xActual) * deltaDeX;
 				
 			}
 			double duracion = walltime_elapsed(start);
-			printf("El area total es %f, el tiempo de ejecucion fue de %f.\n", areaTotal, duracion);
+			printf("El area total es %Lf, el tiempo de ejecucion fue de %f.\n", areaTotal, duracion);
 		}
 	}
 	return 0;
