@@ -1,3 +1,9 @@
+# Integrantes:
+
+Alejandro Ramirez B96367
+
+Oscar Navarro B95549
+
 # Cuadro comparativo
 
 | n | Area | 1 | 16 | 32 | 64 | 128 |
