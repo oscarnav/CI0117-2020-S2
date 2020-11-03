@@ -1,4 +1,4 @@
-$ Integrantes:
+## Integrantes:
 
 Alejandro Ramirez B96367
 
