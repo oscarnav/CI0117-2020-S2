@@ -4,10 +4,27 @@ La directiva omp_do sirve para especificar las iteraciones de un dado ciclo para
 
 Ejemplo:
 
-real(8) :: A(1000), dummy(2:1000:2)
-!Saves the even indices
-!$OMP DO
-do i = 2, 1000, 2
-dummy(i) = A(i)
-enddo
-!$OMP END DO
+
+       INTEGER N, CHUNKSIZE, CHUNK, I
+       PARAMETER (N=1000) 
+       PARAMETER (CHUNKSIZE=100) 
+       REAL A(N), B(N), C(N)
+
+ !     Some initializations
+       DO I = 1, N
+         A(I) = I * 1.0
+         B(I) = A(I)
+       ENDDO
+       CHUNK = CHUNKSIZE
+        
+ !$OMP PARALLEL SHARED(A,B,C,CHUNK) PRIVATE(I)
+
+ !$OMP DO SCHEDULE(DYNAMIC,CHUNK)
+       DO I = 1, N
+          C(I) = A(I) + B(I)
+       ENDDO
+ !$OMP END DO NOWAIT
+
+ !$OMP END PARALLEL
+
+       END
