@@ -6,7 +6,7 @@ Oscar Navarro   B95549
 
 # Para que funciona
 
-La directiva omp_do sirve para especificar las iteraciones de un dado ciclo para que sea ejecutado en paralelo por hilos en el mismo equipo. Es el equivalente a la directiva for para fortran.
+La directiva omp_do sirve para especificar las iteraciones de un dado ciclo para que sea ejecutado en paralelo por hilos en el mismo equipo. Es el equivalente a la directiva omp for para fortran.
 
 Ejemplo:
 
