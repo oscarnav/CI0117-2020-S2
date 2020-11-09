@@ -5,7 +5,7 @@ Alejandro Ramirez B96367
 Oscar Navarro B95549
 
 ## Explicacion de scheduling guiado
-
+Este tipo de scheduling es similar al dinamico pero con la diferencia de que el tamaño de los chunks cambia a medida que el programa corre. Empieza con chunks grandes y se va ajustando a tamaños más pequeños si la carga de trabajo no esta balanceada.
 
 ## Cuadro comparativo
 
