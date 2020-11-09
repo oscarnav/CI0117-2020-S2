@@ -8,13 +8,17 @@ Oscar Navarro B95549
 
 | Prueba | Tiempo de ejecucion |            
 | --- | --- |
-| Serial |  |
-| Parallel | 10.658668 |
-| Cyclic(static,1) | 10.666659 |
-| Cyclic(static,cantidad de hilos) | 10.666667 | 
-| Cyclic(static, mitad de hilos) | 10.666667 | 
-| Cyclic(static, mitad  de iteraciones ) | 10.666667 | 
-| Cyclic(dynamic,1) | 10.666659 |
-| Cyclic(dynamic,cantidad de hilos) | 10.666667 | 
-| Cyclic(dynamic, mitad de hilos) | 10.666667 | 
-| Cyclic(dynamic, mitad  de iteraciones ) | 10.666667 | 
+| Serial | 8,506385308 |
+| Parallel | 8,389533284 |
+| Cyclic (static,1) | 8,214059574 |
+| Cyclic (static,cantidad de hilos) | 8,155760084 | 
+| Cyclic (static, mitad de hilos) | 7,059650245| 
+| Cyclic (static, mitad  de iteraciones ) | 7,061183935 | 
+| Cyclic (dynamic,1) | 8,020856127 |
+| Cyclic (dynamic,cantidad de hilos) | 7,075531187 | 
+| Cyclic (dynamic, mitad de hilos) | 7,0469472159 | 
+| Cyclic (dynamic, mitad  de iteraciones ) | 7,102752436 | 
+| Cyclic (guided,1) | 8,020856127 |
+| Cyclic (guided,cantidad de hilos) | 7,075531187 | 
+| Cyclic (guided, mitad de hilos) | 7,0469472159 | 
+| Cyclic (guided, mitad  de iteraciones ) | 7,102752436 | 
