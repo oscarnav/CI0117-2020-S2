@@ -27,6 +27,7 @@ Este tipo de scheduling es similar al dinámico, pero con la diferencia de que e
 | Cyclic (guided, mitad  de iteraciones ) | 7,131716650s | 
 
 ## Conclusiones
+Según nuestras pruebas realizadas el scheduling con menor tiempo de ejecución fue el scheduling dinámico con el valor N siendo igual a la mitad de hilos (5), nosotros consideramos que la razon por la cual obtuvo el mejor rendimiento fue por la cantidad de procesadores de la maquina dado que la mitad del total de hilos utilizados se aproxima más a la cantidad de procesadores el programa obtiene mejor rendimiento dado que los procesadores no requieren estar cambiando de hilos.
 
 
 
