@@ -6,10 +6,15 @@ Oscar Navarro B95549
 
 # Cuadro comparativo
 
-| n | Area |            
+| Prueba | Tiempo de ejecucion |            
 | --- | --- |
-| 10 | 9.88 |
-| 1000 | 10.658668 |
-| 100 000 | 10.666659 |
-| 100 000 000 | 10.666667 | 
-| 1000 000 000 | 10.666667 | 
+| Serial |  |
+| Parallel | 10.658668 |
+| Cyclic(static,1) | 10.666659 |
+| Cyclic(static,cantidad de hilos) | 10.666667 | 
+| Cyclic(static, mitad de hilos) | 10.666667 | 
+| Cyclic(static, mitad  de iteraciones ) | 10.666667 | 
+| Cyclic(dynamic,1) | 10.666659 |
+| Cyclic(dynamic,cantidad de hilos) | 10.666667 | 
+| Cyclic(dynamic, mitad de hilos) | 10.666667 | 
+| Cyclic(dynamic, mitad  de iteraciones ) | 10.666667 | 
