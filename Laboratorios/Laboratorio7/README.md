@@ -4,7 +4,10 @@ Alejandro Ramirez B96367
 
 Oscar Navarro B95549
 
-# Cuadro comparativo
+## Explicacion de scheduling guiado
+
+
+## Cuadro comparativo
 
 | Prueba | Tiempo de ejecucion |            
 | --- | --- |
@@ -22,3 +25,8 @@ Oscar Navarro B95549
 | Cyclic (guided,cantidad de hilos) | 7,075531187s | 
 | Cyclic (guided, mitad de hilos) | 7,0469472159s | 
 | Cyclic (guided, mitad  de iteraciones ) | 7,102752436s | 
+
+## Conclusiones
+
+
+
