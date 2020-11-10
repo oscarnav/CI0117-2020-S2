@@ -4,7 +4,7 @@ Alejandro Ramirez B96367
 
 Oscar Navarro B95549
 
-##Nota
+## Nota
 Las pruebas fueron realizadas con un numero como máximo de 10 000 000 esto debido a que el hardware hacía que el tiempo de ejecución fuese excesivamente grande para 100 000 000.
 
 ## Explicacion de scheduling guiado
