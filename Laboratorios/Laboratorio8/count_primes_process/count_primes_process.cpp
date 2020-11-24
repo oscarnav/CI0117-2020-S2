@@ -26,10 +26,10 @@ int esPrimo(size_t number){
 }	
 
 
-int calcularPrimos,int my_id, int ultimo, int num_processes){
+int calcularPrimos(int my_id, int ultimo, int num_processes){
     int total = ultimo-1;
-    int cociente = total/num_processes-1;
-    int residuo = total%num_processes-1;
+    int cociente = total/(num_processes-1);
+    int residuo = total%(num_processes-1);
     int cantPorAnalizar = cociente;
     int empezar = cociente*(my_id-1);
     int contador = 0;
@@ -51,8 +51,11 @@ int calcularPrimos,int my_id, int ultimo, int num_processes){
     //proceso4 = 5   2+ 15    empezar = 
     //proceso5 = 4   2+ 20    empezar = 
 
+    
     for(int i = empezar; i < empezar+cantPorAnalizar; ++i){
-        if(esPrimo(empezar + i)){
+       
+        if(esPrimo(i)){
+            //printf("%i es primo", i);
             ++contador;
         }
     }
@@ -62,13 +65,13 @@ int calcularPrimos,int my_id, int ultimo, int num_processes){
 
 
 
-int main(int argc, char* arg[]) {
+int main(int argc, char* argv[]) {
 
 
     int ultimo = 0;
     
     if (argc >= 2) {
-		ultimo = (size_t)strtoul(arg[1], NULL, 10);
+		ultimo = (size_t)strtoul(argv[1], NULL, 10);
     } else {
         fprintf(stderr, "Error, invalid number of parameters\n");
         return 1;
@@ -90,11 +93,11 @@ int main(int argc, char* arg[]) {
     if(my_id != 0){
         message_sent = calcularPrimos(my_id, ultimo, num_processes);
         MPI_Send(&message_sent, 1 /*count*/, MPI_INT, 0 /*dest*/, 123 /*message id*/, MPI_COMM_WORLD);
-    
+    }
     else{
         t1 = MPI_Wtime();
         for(int i = 0; i < num_processes-1; ++i){
-            MPI_Recv(&message_received, 1 /* count*/, MPI_ANY_SOURCE /*source*/, MPI_ANY_TAG /*message id*/, MPI_COMM_WORLD, &status);
+            MPI_Recv(&message_received, 1 /* count*/, MPI_INT,MPI_ANY_SOURCE /*source*/, MPI_ANY_TAG /*message id*/, MPI_COMM_WORLD, &status);
             total_de_primos += message_received;
         }
         t2 = MPI_Wtime();
