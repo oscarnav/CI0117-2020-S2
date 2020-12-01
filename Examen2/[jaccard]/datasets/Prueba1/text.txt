@@ -1,0 +1,10 @@
+MPI (Message Passing Interface) is a specification for a standard library for message passing that was defined by the MPI Forum, a broadly based group of parallel computer vendors, library writers, and applications specialists.
+Multiple implementations of MPI have been developed.
+We document its portability and performance and describe the architecture by which these features are simultaneously achieved.
+We also discuss the set of tools that accompany the free distribution of MPICH, which constitute the beginnings of a portable parallel programming environment.
+A project of this scope inevitably imparts lessons about parallel computing, the specification being followed, the current hardware and software environment for parallel computing, and project management; we describe those we have learned.
+Finally, we discuss future developments for MPICH, including those necessary to accommodate extensions to the MPI Standard now being contemplated by the MPI Forum.
+In very simple terms, it is the use of multiple resources, in this case, processors, to solve a problem. 
+This type of programming takes a problem, breaks it down into a series of smaller steps, delivers instructions, and processors execute the solutions at the same time. 
+It is also a form of programming that offers the same results as concurrent programming but in less time and with more efficiency. 
+Many computers, such as laptops and personal desktops, use this programming in their hardware to ensure that tasks are quickly completed in the background.
