@@ -10,6 +10,7 @@ int coins;
 int isAlive;
 int koopas;
 int goombas;
+int immune;
 char strategy;
 World* world;
 

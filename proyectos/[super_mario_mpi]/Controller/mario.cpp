@@ -115,10 +115,11 @@ int Mario::getKoopas(){
 
 //Para invocar metodo hace que mario se mueva y vea los siguientes elementos
 string Mario::Avanzar( string hilera, int id){
-	string next = world->move(coins,isAlive,goombas,koopas ,hilera, id);
+	string next = world->move(coins,isAlive,goombas,koopas ,hilera, id, immune);
 	return next;
 }
 
+//genera el string informativo: a quien ataco, quienes me atacan, mi tipo de estrategia, total de marios vivos 
 string Mario::generarInfo(int oponentes_vivos, int* posibles_victimas, int* victimas, int my_id, int vivos, int victima){
 	string info_eventos = " | atacking #" + to_string(victima) + " | being attacked by";
     int atacantes = 0;
@@ -139,7 +140,7 @@ string Mario::generarInfo(int oponentes_vivos, int* posibles_victimas, int* vict
     return info_eventos;
 }
 
-//Para invocar metodo que agrega elementos de marios atacando
+//Para invocar metodo que agrega elementos que me envian otros marios
 void Mario::getAttacked(int goomba, int koopa){
 	world->addEnemies(goomba,koopa);
 }

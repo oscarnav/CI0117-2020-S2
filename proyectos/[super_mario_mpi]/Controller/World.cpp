@@ -22,8 +22,10 @@ int World::getPosition(){
 	return position;
 }
 
-string World::move(int &coins, int &imAlive, int &goomba, int &koopa,string hilera, int id){
+//para que mario avanze 1 casilla
+string World::move(int &coins, int &imAlive, int &goomba, int &koopa,string hilera, int id, int &immune){
 	string acontecimientos = "";
+	string evento = "";
 	queue<string>** cola[2];
 	
 	cola[0] = &colaEstatica;
@@ -34,20 +36,34 @@ string World::move(int &coins, int &imAlive, int &goomba, int &koopa,string hile
 		for(int j = 0; j < elementos.length() && imAlive; ++j){
 			char elemento = elementos[j];
 			random = float(rand()%100)/100;
-			acontecimientos += "World pos. "+ to_string(position) + ": Mario #" + to_string(id);
-			if(elemento == 'g'){
-				acontecimientos += goombaEvent(random, imAlive, goomba);
+			evento = "World pos. "+ to_string(position) + ": Mario #" + to_string(id);
+			if(elemento == 's'){ //si me encuentro a una estrella(probabilidad de encontrarla = 1%)
+				immune = 15;
+				evento =  "\n*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\n\n*"+ evento + " has found a super star!! Mario got a star power, immune for " + to_string(immune) + " moves! ";
 			}
-			else if(elemento == 'c'){
-				acontecimientos += coinEvent(random, coins);
+			else if(elemento == 'g'){ //si me encuentro a un goomba
+				evento += goombaEvent(random, imAlive, goomba, immune);
 			}
-			else if(elemento == 'k'){
-				acontecimientos += koopaEvent(random, imAlive, koopa);
+			else if(elemento == 'c'){ //si me encuentro a una moneda
+				evento += coinEvent(random, coins);
 			}
-			else{
-				acontecimientos += holeEvent(random, imAlive);
+			else if(elemento == 'k'){ //si me encuentro a un koopa
+				evento += koopaEvent(random, imAlive, koopa, immune);
 			}
-			acontecimientos += " Coins: " + to_string(coins) + hilera ;
+			else{ //si me encuentro a un hoyo 
+				evento += holeEvent(random, imAlive);
+			}
+			if(immune){ //si soy inmune imprimo cauntos movimientos me quedan para que se me acabe
+				evento += "(immune for " + to_string(immune) + " moves).";
+			}
+			evento += " Coins: " + to_string(coins) + hilera;
+			if(elemento == 's'){
+				evento += "\n\n*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\n";
+			}
+			if(j+1 < elementos.length() && imAlive){
+				evento += "\n";
+			}
+			acontecimientos += evento;
 		}
 		if(!imAlive){
 			acontecimientos += "\nGame Over \n";
@@ -60,8 +76,12 @@ string World::move(int &coins, int &imAlive, int &goomba, int &koopa,string hile
 			(*cola[i])->pop();
 		}
 	}
-	if(acontecimientos.length() == 0 && imAlive){
-		acontecimientos += "World pos. " + to_string(position) + ": Mario #" + to_string(id) + " is walking. Coins: " + to_string(coins) + hilera;
+	if(acontecimientos.length() == 0 && imAlive){ // si no hubo ningun acontecimiento
+		acontecimientos += "World pos. " + to_string(position) + ": Mario #" + to_string(id) + " is walking.";
+		if(immune){
+			acontecimientos += " (immune for " + to_string(immune) + " moves).";
+		}
+		acontecimientos += " Coins: " + to_string(coins) + hilera;
 	}
 	
 	if(position + 1 > 99){
@@ -70,10 +90,13 @@ string World::move(int &coins, int &imAlive, int &goomba, int &koopa,string hile
 	else{
 		++position;
 	}
+	if(immune){
+		--immune;
+	}
 	return acontecimientos;
 }
 
-string World::goombaEvent(float random, int &imAlive, int &goomba){
+string World::goombaEvent(float random, int &imAlive, int &goomba, int immune){
 	string acontecimiento = "";
 	if(random < 0.55){
 		acontecimiento += " jumped over a little goomba! ";
@@ -83,8 +106,13 @@ string World::goombaEvent(float random, int &imAlive, int &goomba){
 		++goomba;
 	}
 	else{
-		acontecimiento += " didn't jump and was killed by a little goomba. ";
-		imAlive = 0;
+		if(immune){
+			acontecimiento += " assassinated a little goomba with his star power!!! ";
+		}
+		else{
+			acontecimiento += " didn't jump and was killed by a little goomba. ";
+			imAlive = 0;
+		}
 	}
 	return acontecimiento;
 }
@@ -101,7 +129,7 @@ string World::coinEvent(float random, int &coins){
 	return acontecimiento;
 }
 
-string World::koopaEvent(float random, int &imAlive, int &koopa){
+string World::koopaEvent(float random, int &imAlive, int &koopa, int immune){
 	string acontecimiento = "";
 	if(random < 0.53){
 		acontecimiento += " jumped over a koopa troopa! ";
@@ -111,6 +139,9 @@ string World::koopaEvent(float random, int &imAlive, int &koopa){
 		++koopa;
 	}
 	else{
+		if(immune){
+			acontecimiento += " snapped a little koopa with his star power!!! ";
+		}
 		acontecimiento += " didn't jump and was killed by a koopa troopa. ";
 		imAlive = 0;
 	}
@@ -129,11 +160,16 @@ string World::holeEvent(float random, int &imAlive){
 	return acontecimiento;
 }
 
+//agregar enemigos que envian otros marios a este mundo
 void World::addEnemies(int goomba, int koopa){
 	int* enemigos[2];
 	string celda = "";
 	enemigos[0] = &goomba;
 	enemigos[1] = &koopa;
+	int super_star = rand()%100;
+	if(!super_star){
+		celda += "s";
+	}
 	for(int i = 0; i < 2; ++i){
 		for(int j = 0; j < *enemigos[i]; ++j){
 			if(i == 0){

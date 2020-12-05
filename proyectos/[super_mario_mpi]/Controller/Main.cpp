@@ -7,6 +7,7 @@
 #include <ios>
 #include "../Model/mario.h"
 
+//proceso 0 le pide al usuario a que mario desea espectar
 int pedirMario(int espectador,int* vidas,int vivos,int num_processes){
     if(!vidas[espectador] && vivos > 1){
                 int esValido = 0;
@@ -18,7 +19,6 @@ int pedirMario(int espectador,int* vidas,int vivos,int num_processes){
                         }
                     }
                     cout << "Ingrese siguiente Mario a espectar" << endl;
-                    //cin >> espectador;
                     try{
                         cin >> espectador;
                         if(cin.fail()){
@@ -75,6 +75,7 @@ int main(int argc, char* argv[]) {
         vidas[i] = 1;
     }
 
+    //Si soy el proceso 0 == el ayudante
     if (my_id == 0) {
         espectador = (int)strtoul(argv[1], NULL, 10);
         
@@ -104,7 +105,7 @@ int main(int argc, char* argv[]) {
         }
     } 
     
-    //entonces no soy el proceso 0
+    //entonces no soy el proceso 0 == soy jugador
     else{
         //si soy el mario que pidio el usuario
         espectador = (int)strtoul(argv[1], NULL, 10);
@@ -156,14 +157,13 @@ int main(int argc, char* argv[]) {
             koopas = mario->getKoopas();
             mario->resetObstacles();
             
-            //hacer el send goombas a mi victima
+            //hacer el send goombas al mario que ataco (victima)
             MPI_Send (&goombas, 1, MPI_INT, victima, 123, MPI_COMM_WORLD);
-            //hacer el send koopas a mi victima
+            //hacer el send koopas al mario que ataco (victima)
             MPI_Send (&koopas, 1, MPI_INT, victima, 124, MPI_COMM_WORLD);
            
            cantidad_de_atacantes = mario->getAttackers(victimas, my_id, num_processes);
-            //hacer el receive goombas a mi victima
-            //hacer el receive koopas a mi victima
+            //hacer el receive goombas y koopas de los marios que me atacan
             for(int i = 0; i < cantidad_de_atacantes; ++i){
                 MPI_Recv (&goombas, 1, MPI_INT, MPI_ANY_SOURCE, 123, MPI_COMM_WORLD, &status);
                 MPI_Recv (&koopas, 1, MPI_INT, MPI_ANY_SOURCE, 124, MPI_COMM_WORLD, &status);
@@ -175,7 +175,7 @@ int main(int argc, char* argv[]) {
             
             im_alive = mario->getLife();
             
-            //Se hace gather de todos los datos de los Marios
+            //Se hace gather de los datos de los Marios
             MPI_Allreduce(&im_alive, &vivos, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
             MPI_Allgather(&im_alive, 1, MPI_INT, vidas, 1, MPI_INT,MPI_COMM_WORLD);
             MPI_Allgather(&coins, 1, MPI_INT, monedas, 1, MPI_INT,MPI_COMM_WORLD);

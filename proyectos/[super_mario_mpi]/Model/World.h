@@ -19,10 +19,10 @@ class World{
 		World();
 		~World();
 		int getPosition();		//puede que no lo necesite
-		string move(int &coins, int &imAlive, int &goomba, int &koopa, string hilera, int id);
-		string goombaEvent(float random, int &imAlive, int &goomba);
+		string move(int &coins, int &imAlive, int &goomba, int &koopa, string hilera, int id, int &immune);
+		string goombaEvent(float random, int &imAlive, int &goomba, int immune);
 		string coinEvent(float random, int &coins);
-		string koopaEvent(float random, int &imAlive, int &koopa);
+		string koopaEvent(float random, int &imAlive, int &koopa, int immune);
 		string holeEvent(float random, int &imAlive);
 		void addEnemies(int goomba, int koopa);
 };
